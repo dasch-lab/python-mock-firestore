@@ -3,7 +3,7 @@ from mockfirestore.collection import CollectionReference
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 from mockfirestore.query import CollectionGroup
 from mockfirestore.transaction import Transaction
-
+from mockfirestore.transaction import BatchTransaction
 
 class MockFirestore:
 
@@ -60,8 +60,11 @@ class MockFirestore:
 
     def collections(self) -> Sequence[CollectionReference]:
         return [CollectionReference(self._data, [collection_name]) for collection_name in self._data]
+    
+    def batch(self) -> BatchTransaction:
+        return BatchTransaction(self)
 
-    def reset(self):
+    def reset(self, reference: DocumentReference, ):
         self._data = {}
 
     def get_all(self, references: Iterable[DocumentReference],
