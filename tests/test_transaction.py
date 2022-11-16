@@ -1,5 +1,5 @@
 from unittest import TestCase
-from mockfirestore import MockFirestore, Transaction
+from mockfirestore import MockFirestore, Transaction, BatchTransaction
 
 
 class TestTransaction(TestCase):
@@ -71,3 +71,21 @@ class TestTransaction(TestCase):
 
 
 
+class TestBatchTransaction(TestCase):
+    def setUp(self) -> None:
+        self.fs = MockFirestore()
+        self.fs._data = {'foo': {
+                'first': {'id': 1},
+                'second': {'id': 2}
+            }}
+    
+    def test_batchTransaction_set_setContentOfDocuments(self):
+        batch = self.fs.batch()
+        doc_contents = [{'id': '3'}, {'id': '4'}]
+        doc_refs = [self.fs.collection('foo').document('third'),
+                    self.fs.collection('foo').document('fourth')]
+        for doc_ref, doc_content in zip(doc_refs, doc_contents):
+            batch.set(doc_ref, doc_content)
+        batch.commit()
+        for doc_ref, doc_content in zip(doc_refs, doc_contents):
+            self.assertEqual(doc_ref.get().to_dict(), doc_content)

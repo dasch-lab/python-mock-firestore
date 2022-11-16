@@ -117,3 +117,28 @@ class Transaction:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:
             self.commit()
+
+class BatchTransaction:
+    # array of transactions
+    def __init__(self, client):
+        self._transactions = []
+    
+    def set(self, reference: DocumentReference, document_data: dict,
+            merge=False):
+        # stash set for later
+        self._transactions.append(partial(reference.set, document_data, merge=merge))
+    
+    def update(self, reference: DocumentReference,
+               field_updates: dict, option=None):
+        # stash update for later
+        self._transactions.append(partial(reference.update, field_updates))
+    
+    def delete(self, reference: DocumentReference, option=None):
+        # stash delete for later
+        self._transactions.append(reference.delete)
+    
+    def commit(self):
+        # execute all transactions
+        for transaction in self._transactions:
+            transaction()
+        self._transactions.clear()
