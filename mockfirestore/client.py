@@ -64,7 +64,7 @@ class MockFirestore:
     def batch(self) -> BatchTransaction:
         return BatchTransaction(self)
 
-    def reset(self, reference: DocumentReference, ):
+    def reset(self):
         self._data = {}
 
     def get_all(self, references: Iterable[DocumentReference],
