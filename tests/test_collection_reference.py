@@ -63,25 +63,40 @@ class TestCollectionReference(TestCase):
         self.assertEqual([], docs)
 
     def test_collection_get_collectionGroup(self):
-        subcollection = 'bar'
+        subcollection = 'subcollection'
         fs = MockFirestore()
         fs._data = {'foo': {
             'first': {
                 'id': 1,
                 subcollection: {
-                    'first_nested': {'id': 1.1}
+                    '111': {'id': 1.1}
                 }
             },
             'second': {
                 'id': 2,
                 subcollection: {
-                    'second_nested': {'id': 2.1}
+                    '222': {'id': 2.1}
+                }
+            }
+        }, 'bar': {
+            'first': {
+                'id': 3,
+                subcollection: {
+                    '333': {'id': 3.1}
+                }
+            },
+            'second': {
+                'id': 4,
+                subcollection: {
+                    '444': {'id': 4.1}
                 }
             }
         }}
         docs = sorted(list(fs.collection_group(subcollection).stream()), key=lambda doc: doc.id)
         self.assertEqual({'id': 1.1}, docs[0].to_dict())
         self.assertEqual({'id': 2.1}, docs[1].to_dict())
+        self.assertEqual({'id': 3.1}, docs[2].to_dict())
+        self.assertEqual({'id': 4.1}, docs[3].to_dict())
 
     def test_collection_get_collectionGroup_collectionDoesNotExist(self):
         subcollection = 'bar'
