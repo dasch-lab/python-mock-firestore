@@ -54,9 +54,9 @@ class MockFirestore:
             )
 
         collection_group_data = _get_collection_group_data(self._data, collection_id)
-        data = {collection_id: collection_group_data}
+        data = {'': collection_group_data}
 
-        return CollectionGroup(CollectionReference(data, [collection_id]))
+        return CollectionGroup(CollectionReference(data, ['']))
 
     def collections(self) -> Sequence[CollectionReference]:
         return [CollectionReference(self._data, [collection_name]) for collection_name in self._data]
@@ -97,7 +97,7 @@ def _get_collection_group_data(data: dict, name: str, output: Optional[dict] = N
             if len(path) == 0:
                 new_output[k] = v
             else:
-                new_output['/'.join(path) + '/' + k] = v
+                new_output['/'.join(path) + '/' + name + '/' + k] = v
         output.update(new_output)
         return output
     else:
