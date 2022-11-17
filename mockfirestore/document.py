@@ -16,6 +16,8 @@ class DocumentSnapshot:
 
     @property
     def id(self):
+        if '/' in self.reference.id:
+            return self.reference.id.split('/')[-1]
         return self.reference.id
 
     @property

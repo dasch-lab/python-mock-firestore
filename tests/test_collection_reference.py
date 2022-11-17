@@ -78,25 +78,32 @@ class TestCollectionReference(TestCase):
                     '222': {'id': 2.1}
                 }
             }
-        }, 'bar': {
+        }, 'foobar': {
             'first': {
                 'id': 3,
                 subcollection: {
-                    '333': {'id': 3.1}
+                    '111': {'id': 3.1}
                 }
             },
             'second': {
                 'id': 4,
                 subcollection: {
-                    '444': {'id': 4.1}
+                    '222': {'id': 4.1}
                 }
+            },
+            subcollection: {
+                'bugid': {'id': 0.0}
             }
         }}
-        docs = sorted(list(fs.collection_group(subcollection).stream()), key=lambda doc: doc.id)
+        docs = sorted(list(fs.collection_group(subcollection).stream()), key=lambda doc: doc.to_dict()["id"])
         self.assertEqual({'id': 1.1}, docs[0].to_dict())
+        self.assertEqual('111', docs[0].id)
         self.assertEqual({'id': 2.1}, docs[1].to_dict())
+        self.assertEqual('222', docs[1].id)
         self.assertEqual({'id': 3.1}, docs[2].to_dict())
+        self.assertEqual('111', docs[2].id)
         self.assertEqual({'id': 4.1}, docs[3].to_dict())
+        self.assertEqual('222', docs[3].id)
 
     def test_collection_get_collectionGroup_collectionDoesNotExist(self):
         subcollection = 'bar'

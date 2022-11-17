@@ -77,7 +77,7 @@ class MockFirestore:
         return Transaction(self, **kwargs)
 
 
-def _get_collection_group_data(data: dict, name: str, output: Optional[dict] = None) -> dict:
+def _get_collection_group_data(data: dict, name: str, output: Optional[dict] = None, depth=0, path=[]) -> dict:
     """
     Recursively get the data for a collection group.
 
@@ -90,12 +90,24 @@ def _get_collection_group_data(data: dict, name: str, output: Optional[dict] = N
         A flat dictionary containing all the data for the collection group.
     """
     output = output or {}
-    if name in data:
-        output.update(data[name])
+    if depth % 2 == 0 and name in data:
+        new_output = {}
+        for k in data[name]:
+            v = data[name][k]
+            if len(path) == 0:
+                new_output[k] = v
+            else:
+                new_output['/'.join(path) + '/' + k] = v
+        output.update(new_output)
         return output
     else:
-        for documents_in_collection in data.values():
+        for k in data:
+            documents_in_collection = data[k]
             if isinstance(documents_in_collection, dict):
-                output.update(_get_collection_group_data(documents_in_collection, name, output))
+                if len(path) == 0:
+                    new_parent_path = [k]
+                else:
+                    new_parent_path = path + [k]
+                output.update(_get_collection_group_data(documents_in_collection, name, output, depth+1, new_parent_path))
 
     return output
