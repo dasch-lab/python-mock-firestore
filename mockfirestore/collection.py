@@ -89,3 +89,26 @@ class CollectionReference:
         for key in sorted(get_by_path(self._data, self._path)):
             doc_snapshot = self.document(key).get()
             yield doc_snapshot
+
+class CollectionGroupReference(CollectionReference):
+    def document(self, document_id: Optional[str] = None, path: List[str] = None) -> DocumentReference:
+        if path is None:
+            path = self._path
+        collection = get_by_path(self._data, path)
+        if document_id is None:
+            document_id = generate_random_string()
+        # new_path = self._path + [document_id]
+        if document_id not in collection:
+            set_by_path(self._data, path, {})
+        return DocumentReference(self._data, path, parent=CollectionReference(self._data, path[:-1]))
+    
+    def get(self) -> Iterable[DocumentSnapshot]:
+        warnings.warn('Collection.get is deprecated, please use Collection.stream',
+                      category=DeprecationWarning)
+        return self.stream()
+
+    def stream(self, transaction=None) -> Iterable[DocumentSnapshot]:
+        for path in self._path:
+            for key in sorted(get_by_path(self._data, path)):
+                doc_snapshot = self.document(key, path).get()
+                yield doc_snapshot

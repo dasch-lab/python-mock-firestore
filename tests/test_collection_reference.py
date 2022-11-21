@@ -90,12 +90,10 @@ class TestCollectionReference(TestCase):
                 subcollection: {
                     '222': {'id': 4.1}
                 }
-            },
-            subcollection: {
-                'bugid': {'id': 0.0}
             }
         }}
-        docs = sorted(list(fs.collection_group(subcollection).stream()), key=lambda doc: doc.to_dict()["id"])
+        arr = list(fs.collection_group(subcollection).stream())
+        docs = sorted(arr, key=lambda doc: doc.to_dict()["id"])
         self.assertEqual({'id': 1.1}, docs[0].to_dict())
         self.assertEqual('111', docs[0].id)
         self.assertEqual('foo/first/subcollection/111', docs[0].reference.path)
@@ -108,6 +106,10 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'id': 4.1}, docs[3].to_dict())
         self.assertEqual('222', docs[3].id)
         self.assertEqual('foobar/second/subcollection/222', docs[3].reference.path)
+        # print([f.reference.path for f in fs.collection('foobar').stream()])
+        self.assertEqual(docs[3].reference.path, docs[3].reference.parent.document('222').path)
+        # print(fs.collection('foobar').document('second').collection(subcollection).document('222').path)
+        # print(fs.collection('foobar').document('second').collection(subcollection).document('222').parent.document('222').path)
 
     def test_collection_get_collectionGroup_collectionDoesNotExist(self):
         subcollection = 'bar'
