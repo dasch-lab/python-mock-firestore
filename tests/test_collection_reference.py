@@ -108,6 +108,8 @@ class TestCollectionReference(TestCase):
         self.assertEqual('foobar/second/subcollection/222', docs[3].reference.path)
         # print([f.reference.path for f in fs.collection('foobar').stream()])
         self.assertEqual(docs[3].reference.path, docs[3].reference.parent.document('222').path)
+        self.assertEqual('foobar/second/subcollection', docs[3].reference.parent.path)
+        self.assertEqual('foobar/second', docs[3].reference.parent.parent.path)
         # print(fs.collection('foobar').document('second').collection(subcollection).document('222').path)
         # print(fs.collection('foobar').document('second').collection(subcollection).document('222').parent.document('222').path)
 

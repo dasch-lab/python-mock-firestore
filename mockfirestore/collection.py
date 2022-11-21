@@ -27,6 +27,12 @@ class CollectionReference:
         warnings.warn('Collection.get is deprecated, please use Collection.stream',
                       category=DeprecationWarning)
         return self.stream()
+    
+    @property
+    def path(self):
+        if self._path[0] == '':
+            return '/'.join(self._path[1:])
+        return '/'.join(self._path)
 
     def add(self, document_data: Dict, document_id: str = None) \
             -> Tuple[Timestamp, DocumentReference]:
@@ -91,6 +97,15 @@ class CollectionReference:
             yield doc_snapshot
 
 class CollectionGroupReference(CollectionReference):
+    def recursive_reference(self, path: List[str]) -> DocumentReference or CollectionReference:
+        if len(path) == 1:
+            return CollectionReference(self._data, path)
+        else:
+            if len(path) % 2 == 0:
+                return DocumentReference(self._data, path, parent=self.recursive_reference(path[:-1]))
+            else:
+                return CollectionReference(self._data, path, parent=self.recursive_reference(path[:-1]))
+
     def document(self, document_id: Optional[str] = None, path: List[str] = None) -> DocumentReference:
         if path is None:
             path = self._path
@@ -100,7 +115,7 @@ class CollectionGroupReference(CollectionReference):
         # new_path = self._path + [document_id]
         if document_id not in collection:
             set_by_path(self._data, path, {})
-        return DocumentReference(self._data, path, parent=CollectionReference(self._data, path[:-1]))
+        return self.recursive_reference(path)
     
     def get(self) -> Iterable[DocumentSnapshot]:
         warnings.warn('Collection.get is deprecated, please use Collection.stream',
