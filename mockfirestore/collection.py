@@ -113,9 +113,8 @@ class CollectionGroupReference(CollectionReference):
         if document_id is None:
             document_id = generate_random_string()
         # new_path = self._path + [document_id]
-        if document_id not in collection:
-            set_by_path(self._data, path, {})
-        return self.recursive_reference(path)
+        ret = self.recursive_reference(path)
+        return ret
     
     def get(self) -> Iterable[DocumentSnapshot]:
         warnings.warn('Collection.get is deprecated, please use Collection.stream',
@@ -124,6 +123,5 @@ class CollectionGroupReference(CollectionReference):
 
     def stream(self, transaction=None) -> Iterable[DocumentSnapshot]:
         for path in self._path:
-            for key in sorted(get_by_path(self._data, path)):
-                doc_snapshot = self.document(key, path).get()
-                yield doc_snapshot
+            doc_snapshot = self.document(path[-1], path).get()
+            yield doc_snapshot

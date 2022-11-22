@@ -1,3 +1,4 @@
+import uuid
 from unittest import TestCase
 
 from mockfirestore import MockFirestore, DocumentReference, DocumentSnapshot, AlreadyExists
@@ -94,6 +95,7 @@ class TestCollectionReference(TestCase):
         }}
         arr = list(fs.collection_group(subcollection).stream())
         docs = sorted(arr, key=lambda doc: doc.to_dict()["id"])
+        self.assertEqual(len(docs), 4)
         self.assertEqual({'id': 1.1}, docs[0].to_dict())
         self.assertEqual('111', docs[0].id)
         self.assertEqual('foo/first/subcollection/111', docs[0].reference.path)
@@ -110,6 +112,21 @@ class TestCollectionReference(TestCase):
         self.assertEqual(docs[3].reference.path, docs[3].reference.parent.document('222').path)
         self.assertEqual('foobar/second/subcollection', docs[3].reference.parent.path)
         self.assertEqual('foobar/second', docs[3].reference.parent.parent.path)
+
+        # search_logs simulation
+        fs = MockFirestore()
+        user_cnt = 5
+        user_ids = [str(uuid.uuid4()) for _ in range(user_cnt)]
+        search_log_cnt = 5
+        for user_id in user_ids:
+            for i in range(search_log_cnt):
+                fs.collection('user').document(user_id).collection('search_logs').document(str(i)).set({
+                    'id': i,
+                    'keyword': 'keyword_{}'.format(i)
+                })
+        arr = list(fs.collection_group('search_logs').where("id", "==", 1).stream())
+        self.assertEqual(user_cnt, len(arr))
+
         # print(fs.collection('foobar').document('second').collection(subcollection).document('222').path)
         # print(fs.collection('foobar').document('second').collection(subcollection).document('222').parent.document('222').path)
 
