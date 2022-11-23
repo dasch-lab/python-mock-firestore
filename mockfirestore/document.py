@@ -78,6 +78,7 @@ class DocumentReference:
         delete_by_path(self._data, self._path)
 
     def set(self, data: Dict, merge=False):
+        data['__name__'] = self.id
         if merge:
             try:
                 self.update(deepcopy(data))
