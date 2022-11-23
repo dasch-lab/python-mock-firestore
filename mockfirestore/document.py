@@ -25,7 +25,10 @@ class DocumentSnapshot:
         return self._doc != {}
 
     def to_dict(self) -> Document:
-        return self._doc
+        doc = deepcopy(self._doc)
+        if '__name__' in doc:
+            del doc['__name__']
+        return doc
 
     @property
     def create_time(self) -> Timestamp:
@@ -78,13 +81,15 @@ class DocumentReference:
         delete_by_path(self._data, self._path)
 
     def set(self, data: Dict, merge=False):
+        data = deepcopy(data)
+        data['__name__'] = self.id
         if merge:
             try:
-                self.update(deepcopy(data))
+                self.update(data)
             except NotFound:
                 self.set(data)
         else:
-            set_by_path(self._data, self._path, deepcopy(data))
+            set_by_path(self._data, self._path, data)
 
     def update(self, data: Dict[str, Any]):
         document = get_by_path(self._data, self._path)
