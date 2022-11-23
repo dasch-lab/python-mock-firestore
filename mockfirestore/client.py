@@ -53,9 +53,9 @@ class MockFirestore:
                 + ". Collection IDs must not contain '/'."
             )
 
-        collection_group_data, keys = _get_collection_group_data(self._data, collection_id)
+        _, keys = _get_collection_group_data(self._data, collection_id)
 
-        return CollectionGroup(CollectionGroupReference(collection_group_data, keys))
+        return CollectionGroup(CollectionGroupReference(self._data, keys))
 
     def collections(self) -> Sequence[CollectionReference]:
         return [CollectionReference(self._data, [collection_name]) for collection_name in self._data]
