@@ -34,7 +34,7 @@ class Query:
         if self.orders:
             for key, direction in self.orders:
                 doc_snapshots = sorted(doc_snapshots,
-                                       key=lambda doc: doc.to_dict()[key],
+                                       key=lambda doc: doc.to_dict(internal=True)[key],
                                        reverse=direction == 'DESCENDING')
         if self._start_at:
             document_fields_or_snapshot, before = self._start_at
@@ -100,7 +100,7 @@ class Query:
             index = None
             if isinstance(document_fields_or_snapshot, dict):
                 for k, v in document_fields_or_snapshot.items():
-                    if doc.to_dict().get(k, None) == v:
+                    if doc.to_dict(internal=True).get(k, None) == v:
                         index = idx
                     else:
                         index = None

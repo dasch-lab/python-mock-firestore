@@ -24,9 +24,9 @@ class DocumentSnapshot:
     def exists(self) -> bool:
         return self._doc != {}
 
-    def to_dict(self) -> Document:
+    def to_dict(self, internal=False) -> Document:
         doc = deepcopy(self._doc)
-        if '__name__' in doc:
+        if not internal and '__name__' in doc:
             del doc['__name__']
         return doc
 
