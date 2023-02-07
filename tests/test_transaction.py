@@ -109,3 +109,13 @@ class TestBatchTransaction(TestCase):
         doc2 = fs.collection('foobar').document('dummy2').collection('foo').document('fourth')
         self.assertEqual(doc1.get().to_dict(), {'id': 3})
         self.assertEqual(doc2.get().to_dict(), {'id': 4})
+
+        fs = MockFirestore()
+        doc1 = fs.collection("bar").document("dummy1").collection('foo').document('first')
+        doc2 = fs.collection("foobar").document("dummy2").collection('foo').document('second')
+        batch = fs.batch()
+        batch.set(doc1, {'id': 1})
+        batch.set(doc2, {'id': 2})
+        batch.commit()
+        self.assertEqual(fs.collection('bar').document('dummy1').collection('foo').document('first').get().to_dict(), {'id': 1})
+        self.assertEqual(fs.collection('foobar').document('dummy2').collection('foo').document('second').get().to_dict(), {'id': 2})
