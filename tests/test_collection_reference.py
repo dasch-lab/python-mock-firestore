@@ -593,3 +593,25 @@ class TestCollectionReference(TestCase):
         }}
         doc = fs.collection('foo').document(document_id='first').get()
         self.assertEqual({'id': 1}, doc.to_dict())
+
+    def test_collection_count(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'id': 1},
+            'second': {'id': 2}
+        }}
+        self.assertEqual(2, fs.collection('foo').count()[0][0].value)
+
+        # test subcollection
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {
+                'yaya': 1,
+                'bar': {
+                    'first_nested': {'id': 1.1},
+                    'second_nested': {'id': 1.2},
+                    'third_nested': {'id': 1.3}
+                }
+            }
+        }}
+        self.assertEqual(3, fs.collection('foo').document('first').collection('bar').count()[0][0].value)

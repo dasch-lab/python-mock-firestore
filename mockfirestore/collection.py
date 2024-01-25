@@ -6,6 +6,7 @@ from mockfirestore._helpers import generate_random_string, Store, get_by_path, s
 from mockfirestore.query import Query
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 
+from types import SimpleNamespace
 
 class CollectionReference:
     def __init__(self, data: Store, path: List[str],
@@ -95,6 +96,10 @@ class CollectionReference:
         for key in sorted(get_by_path(self._data, self._path)):
             doc_snapshot = self.document(key).get()
             yield doc_snapshot
+    
+    def count(self) -> any:
+        # TODO: implement google.cloud.firestore_v1.base_aggregation.AggregationResult
+        return [[SimpleNamespace(**{'value': len(get_by_path(self._data, self._path))})]]
 
 class CollectionGroupReference(CollectionReference):
     def recursive_reference(self, path: List[str]) -> DocumentReference or CollectionReference:
