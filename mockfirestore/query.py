@@ -5,6 +5,13 @@ from typing import Iterator, Any, Optional, List, Callable, Union
 from mockfirestore.document import DocumentSnapshot
 from mockfirestore._helpers import T
 
+# Since we can't find the case Aggregation Query modifies after once it's created, we will just initialize it with the result
+class AggregationQuery:
+    def __init__(self, result: Any) -> None:
+        self.result = result
+    
+    def get(self) -> Any:
+        return self.result
 
 class Query:
     def __init__(self, parent: 'CollectionReference', projection=None,

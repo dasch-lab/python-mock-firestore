@@ -600,7 +600,7 @@ class TestCollectionReference(TestCase):
             'first': {'id': 1},
             'second': {'id': 2}
         }}
-        self.assertEqual(2, fs.collection('foo').count()[0][0].value)
+        self.assertEqual(2, fs.collection('foo').count().get()[0][0].value)
 
         # test subcollection
         fs = MockFirestore()
@@ -614,4 +614,4 @@ class TestCollectionReference(TestCase):
                 }
             }
         }}
-        self.assertEqual(3, fs.collection('foo').document('first').collection('bar').count()[0][0].value)
+        self.assertEqual(3, fs.collection('foo').document('first').collection('bar').count().get()[0][0].value)

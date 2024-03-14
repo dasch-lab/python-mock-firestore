@@ -3,7 +3,7 @@ from typing import Any, List, Optional, Iterable, Dict, Tuple, Sequence, Union
 
 from mockfirestore import AlreadyExists
 from mockfirestore._helpers import generate_random_string, Store, get_by_path, set_by_path, Timestamp
-from mockfirestore.query import Query
+from mockfirestore.query import Query, AggregationQuery
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 
 from types import SimpleNamespace
@@ -99,7 +99,7 @@ class CollectionReference:
     
     def count(self) -> any:
         # TODO: implement google.cloud.firestore_v1.base_aggregation.AggregationResult
-        return [[SimpleNamespace(**{'value': len(get_by_path(self._data, self._path))})]]
+        return AggregationQuery([[SimpleNamespace(**{'value': len(get_by_path(self._data, self._path))})]])
 
 class CollectionGroupReference(CollectionReference):
     def recursive_reference(self, path: List[str]) -> DocumentReference or CollectionReference:
