@@ -1,7 +1,7 @@
 import warnings
 from itertools import islice, tee
 from typing import Iterator, Any, Optional, List, Callable, Union
-
+from google.cloud.firestore_v1.base_query import FieldFilter
 from mockfirestore.document import DocumentSnapshot
 from mockfirestore._helpers import T
 
@@ -68,7 +68,11 @@ class Query:
         compare = self._compare_func(op)
         self._field_filters.append((field, compare, value))
 
-    def where(self, field: str, op: str, value: Any) -> 'Query':
+    def where(self, field: Optional[str]=None, op: Optional[str]=None, value: Optional[Any]=None, filter: Optional[FieldFilter]=None) -> 'Query':
+        if filter is not None:
+            field, op, value = filter.field_path, filter.op_string, filter.value
+        if field is None or op is None or value is None:
+            raise ValueError('field, op, and value must be provided (or a FieldFilter instance)')
         self._add_field_filter(field, op, value)
         return self
 

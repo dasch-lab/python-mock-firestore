@@ -5,6 +5,7 @@ from mockfirestore import AlreadyExists
 from mockfirestore._helpers import generate_random_string, Store, get_by_path, set_by_path, Timestamp
 from mockfirestore.query import Query, AggregationQuery
 from mockfirestore.document import DocumentReference, DocumentSnapshot
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 from types import SimpleNamespace
 
@@ -48,7 +49,11 @@ class CollectionReference:
         timestamp = Timestamp.from_now()
         return timestamp, doc_ref
 
-    def where(self, field: str, op: str, value: Any) -> Query:
+    def where(self, field: Optional[str]=None, op: Optional[str]=None, value: Optional[Any]=None, filter: Optional[FieldFilter]=None) -> Query:
+        if filter is not None:
+            field, op, value = filter.field_path, filter.op_string, filter.value
+        if field is None or op is None or value is None:
+            raise ValueError('field, op, and value must be provided (or a FieldFilter instance)')
         query = Query(self, field_filters=[(field, op, value)])
         return query
 
