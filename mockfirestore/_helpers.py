@@ -34,7 +34,16 @@ def set_by_path(data: Dict[str, T], path: Sequence[str], value: T, create_nested
         if not isinstance(new_data_nested, dict):
             data_nested[key] = {}
         data_nested = data_nested[key]
+    # if data_nested[path[-1]] has sub collections, backup them and restore after setting value
+    backup = {}
+    if isinstance(data_nested.get(path[-1], None), dict):
+        for key in data_nested[path[-1]].keys():
+            if isinstance(data_nested[path[-1]][key], dict):
+                backup[key] = data_nested[path[-1]][key]
     data_nested[path[-1]] = value
+    if backup:
+        for key in backup.keys():
+            data_nested[path[-1]][key] = backup[key]
 
 
 def delete_by_path(data: Dict[str, T], path: Sequence[str]):

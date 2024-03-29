@@ -737,3 +737,12 @@ class TestCollectionReference(TestCase):
             }
         }}
         self.assertEqual(3, fs.collection('foo').document('first').collection('bar').count().get()[0][0].value)
+    
+    def test_collection_exist_after_parent_document_set(self):
+        fs = MockFirestore()
+        fs.collection('foo').document('bar').set({'abc': 'def'})
+        fs.collection('foo').document('bar').collection('baz').document('qux').set({'anykey': 'anyvalue'})
+        fs.collection('foo').document('bar').set({'ghi': 'jlk'})
+        
+        # check if baz/qux exists
+        self.assertEqual({'anykey': 'anyvalue'}, fs.collection('foo').document('bar').collection('baz').document('qux').get().to_dict())
