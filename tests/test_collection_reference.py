@@ -3,6 +3,7 @@ from unittest import TestCase
 
 from mockfirestore import MockFirestore, DocumentReference, DocumentSnapshot, AlreadyExists
 from google.cloud.firestore_v1.base_query import FieldFilter
+from google.cloud.firestore_v1.base_query import BaseCompositeFilter
 
 class TestCollectionReference(TestCase):
     def test_collection_get_returnsDocuments(self):
@@ -270,6 +271,16 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'field': ['val4']}, contains_any_docs[0].to_dict())
         self.assertEqual({'field': ['val3', 'val2', 'val1']}, contains_any_docs[1].to_dict())
     
+    def test_collection_whereWithBaseCompositeFilter(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'valid': True, 'name': 'pippi'},
+            'second': {'gumby': False, 'name': 'pluto'}
+        }}
+        filter_list = [ FieldFilter('valid', '==', True), FieldFilter('name', '==', 'pippi')]
+        docs = list(fs.collection('foo').where(filter=BaseCompositeFilter('AND', filter_list)).stream())
+        self.assertEqual({'valid': True, 'name': 'pippi'}, docs[0].to_dict())
+        
     def test_collection_whereEqualsWithFieldFilter(self):
         fs = MockFirestore()
         fs._data = {'foo': {

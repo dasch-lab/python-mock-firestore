@@ -5,7 +5,7 @@ from mockfirestore import AlreadyExists
 from mockfirestore._helpers import generate_random_string, Store, get_by_path, set_by_path, Timestamp
 from mockfirestore.query import Query, AggregationQuery
 from mockfirestore.document import DocumentReference, DocumentSnapshot
-from google.cloud.firestore_v1.base_query import FieldFilter
+from google.cloud.firestore_v1.base_query import FieldFilter, BaseFilter
 
 from types import SimpleNamespace
 
@@ -48,13 +48,43 @@ class CollectionReference:
         doc_ref.set(document_data)
         timestamp = Timestamp.from_now()
         return timestamp, doc_ref
+    
+    @staticmethod
+    def _filter_to_tuple(flt: BaseFilter):
+        # If it's a composite filter, convert each sub‑filter recursively.
+        if hasattr(flt, "filters") and isinstance(flt.filters, list):
+            # This is assumed to be a composite filter.
+            # TODO: right now, it only supports AND operators
+            return [ CollectionReference._filter_to_tuple(sub) for sub in flt.filters ]
+        # Otherwise, assume it's a simple field filter.
+        elif hasattr(flt, "field_path"):
+            return (flt.field_path, flt.op_string, flt.value)
+        else:
+            raise ValueError("Unsupported filter type: {}".format(type(flt)))
 
-    def where(self, field: Optional[str]=None, op: Optional[str]=None, value: Optional[Any]=None, filter: Optional[FieldFilter]=None) -> Query:
+    # def where(self, field: Optional[str]=None, op: Optional[str]=None, value: Optional[Any]=None, filter: Optional[FieldFilter]=None) -> Query:
+    def where(self, field: Optional[str]=None, op: Optional[str]=None, value: Optional[Any]=None, filter: Optional[BaseFilter]=None) -> Query:
+        
+        filter_list = []
         if filter is not None:
-            field, op, value = filter.field_path, filter.op_string, filter.value
-        if field is None or op is None or value is None:
-            raise ValueError('field, op, and value must be provided (or a FieldFilter instance)')
-        query = Query(self, field_filters=[(field, op, value)])
+            # Allow passing a tuple directly.
+            if isinstance(filter, tuple):
+                filter_list.append(filter)
+            else:
+                # Convert the BaseFilter (which might be a composite filter) to tuple form.
+                compose_result = CollectionReference._filter_to_tuple(filter)
+                
+                # Decorate with list if needed
+                filter_list = compose_result if isinstance(compose_result, list) else [compose_result]
+        else:
+            if field is None or op is None or value is None:
+                raise ValueError(
+                    "field, op, and value must be provided (or a BaseFilter instance)"
+                )
+            filter_list.append((field, op, value))
+        
+        # Create a query object
+        query = Query(self, field_filters=filter_list)
         return query
 
     def order_by(self, key: str, direction: Optional[str] = None) -> Query:
